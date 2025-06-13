@@ -17,7 +17,7 @@ export const func_spanCircles = () => {
 
   // Process text nodes
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node) => NodeFilter.FILTER_ACCEPT,
+    acceptNode: () => NodeFilter.FILTER_ACCEPT,
   });
   const nodesToProcess = [];
 
@@ -58,21 +58,29 @@ export const func_spanCircles = () => {
     parent.removeChild(node);
   });
 
-  // Set viewBox and rect attributes
-  requestAnimationFrame(() => {
+  // Функция для обновления размеров SVG rect
+  function updateRects() {
     document.querySelectorAll('.highlight').forEach((highlight) => {
       const svg = highlight.querySelector('svg');
-      const rect = svg.querySelector('rect');
+      const rect = svg && svg.querySelector('rect');
       if (svg && rect) {
         const { width, height } = highlight.getBoundingClientRect();
         svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
         svg.setAttribute('preserveAspectRatio', 'none');
-        rect.setAttribute('width', width);
-        rect.setAttribute('height', height);
-        const r = height / 2;
+        rect.setAttribute('width', width.toString());
+        rect.setAttribute('height', height.toString());
+        const r = (height / 2).toString();
         rect.setAttribute('rx', r);
         rect.setAttribute('ry', r);
       }
     });
+  }
+
+  // Первоначальный вызов
+  requestAnimationFrame(updateRects);
+
+  // Обработка resize
+  window.addEventListener('resize', () => {
+    requestAnimationFrame(updateRects);
   });
 };
