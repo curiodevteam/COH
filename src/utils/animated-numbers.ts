@@ -2,19 +2,31 @@ export const func_numberAnimations = () => {
   const all_numberSpans = document.querySelectorAll('[animated-number]');
 
   if (all_numberSpans.length) {
+    // Reset all numbers to zero immediately
+    all_numberSpans.forEach((element) => {
+      const el = element as HTMLElement;
+      const originalText = el.textContent || '0';
+
+      // Store original number in data attribute
+      el.dataset.originalNumber = originalText;
+
+      // Determine number format
+      const hasComma = originalText.includes(',');
+      const hasDot = originalText.includes('.');
+      const decimalSeparator = hasComma ? ',' : hasDot ? '.' : '';
+
+      // Reset to zero with proper format
+      el.textContent = decimalSeparator ? `0${decimalSeparator}00` : '0';
+    });
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const element = entry.target as HTMLElement;
-            const originalText = element.textContent || '0';
+            const originalText = element.dataset.originalNumber || '0';
 
-            // Store original number in data attribute if not already stored
-            if (!element.dataset.originalNumber) {
-              element.dataset.originalNumber = originalText;
-            }
-
-            // Determine number format (decimal separator)
+            // Determine number format
             const hasComma = originalText.includes(',');
             const hasDot = originalText.includes('.');
             const decimalSeparator = hasComma ? ',' : hasDot ? '.' : '';
@@ -22,7 +34,7 @@ export const func_numberAnimations = () => {
             // Extract numeric value
             const numericValue = parseFloat(originalText.replace(/[^\d.-]/g, ''));
 
-            // Start animation after 300ms delay
+            // Start animation after delay
             setTimeout(() => {
               animateNumber(element, 0, numericValue, decimalSeparator);
             }, 600);
@@ -33,7 +45,7 @@ export const func_numberAnimations = () => {
         });
       },
       {
-        threshold: 0.1, // Trigger when at least 10% of the element is visible
+        threshold: 0.1,
       }
     );
 
