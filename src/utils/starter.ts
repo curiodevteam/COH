@@ -1,6 +1,6 @@
-export const func_new = () => {
-  const all_newAlements = document.querySelectorAll('[*]');
-  if (all_newAlements.length) {
+export const func_rawHubspotStyles = () => {
+  const all_hsForms = document.querySelectorAll('[*]');
+  if (all_hsForms.length) {
     //
   }
 };
