@@ -72,10 +72,10 @@ export const func_spanCircles = () => {
       if (svg) {
         const { width, height } = highlight.getBoundingClientRect();
         const em = parseFloat(getComputedStyle(highlight).fontSize) || 16;
-        const extra = 0.01 * width; // 5% ширины с каждой стороны
+        const extra = 0.01 * width; // 5% of the width on each side
         const extension = 0.2 * em + extra;
         const svgWidth = width + 2 * extension;
-        const svgHeight = height + 4; // небольшой запас по высоте
+        const svgHeight = height + 4; // small height margin
         svg.style.left = -extension + 'px';
         svg.style.width = svgWidth + 'px';
         svg.style.height = svgHeight + 'px';
