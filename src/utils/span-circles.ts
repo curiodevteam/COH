@@ -10,10 +10,7 @@ export const func_spanCircles = () => {
     }
     .highlight > svg {
       position: absolute;
-      top: -2px;
-      left: -0.5em;
-      width: calc(100% + 1em);
-      height: calc(100% + 4px);
+      top: 0px;
       z-index: -1;
       pointer-events: none;
       overflow: visible;
@@ -54,7 +51,7 @@ export const func_spanCircles = () => {
     while ((match = regex.exec(text))) {
       result += text.slice(lastIndex, match.index);
       const innerText = match[1].trim().replace(/\s+/g, ' ');
-      result += `<span class="highlight"><svg style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;"></svg><span class="text">${innerText}</span></span>`;
+      result += `<span class="highlight"><svg></svg><span class="text">${innerText}</span></span>`;
       lastIndex = match.index + match[0].length;
     }
     result += text.slice(lastIndex);
@@ -75,12 +72,14 @@ export const func_spanCircles = () => {
       if (svg) {
         const { width, height } = highlight.getBoundingClientRect();
         const em = parseFloat(getComputedStyle(highlight).fontSize) || 16;
-        const padding = em; // по 0.5em слева и справа
-        const svgWidth = width + padding;
-        const svgHeight = height + 8; // небольшой запас по высоте
+        const extra = 0.01 * width; // 5% ширины с каждой стороны
+        const extension = 0.2 * em + extra;
+        const svgWidth = width + 2 * extension;
+        const svgHeight = height + 4; // небольшой запас по высоте
+        svg.style.left = -extension + 'px';
+        svg.style.width = svgWidth + 'px';
+        svg.style.height = svgHeight + 'px';
         svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
-        svg.setAttribute('width', svgWidth.toString());
-        svg.setAttribute('height', svgHeight.toString());
         svg.setAttribute('preserveAspectRatio', 'none');
         svg.innerHTML = '';
         const roughSvg = rough.svg(svg);
