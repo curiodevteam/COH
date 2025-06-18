@@ -1,4 +1,4 @@
-import rough from 'roughjs';
+import rough from 'roughjs'; // Оставляем импорт для совместимости, но не используем
 
 export const func_spanCircles = () => {
   // Create and append styles
@@ -65,7 +65,7 @@ export const func_spanCircles = () => {
     parent.removeChild(node);
   });
 
-  // Function to update ellipses using Rough.js
+  // Function to update ellipses using standard SVG
   function updateEllipses() {
     document.querySelectorAll('.highlight').forEach((highlight) => {
       const svg = highlight.querySelector('svg');
@@ -82,18 +82,18 @@ export const func_spanCircles = () => {
         svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
         svg.setAttribute('preserveAspectRatio', 'none');
         svg.innerHTML = '';
-        const roughSvg = rough.svg(svg);
+
+        // Create a standard SVG path
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         const baseW = 509,
           baseH = 63;
         const scaleX = svgWidth / baseW;
         const scaleY = svgHeight / baseH;
         const pathData = `M276.944 60.9893C269.559 60.9979 262.074 61 254.5 61C112.873 61 2 60.2684 2 30.0629C2 -0.142578 112.873 2.03456 254.5 2.03456C396.127 2.03456 507 -0.142578 507 30.0629C507 55.9993 425.253 60.2044 312.481 60.875C307.552 60.9043 302.563 60.9269 297.519 60.9442M276.944 60.9893C283.895 60.9813 290.756 60.9674 297.519 60.9442M276.944 60.9893L297.519 60.9442`;
-        const path = roughSvg.path(pathData, {
-          stroke: '#EA1D63',
-          strokeWidth: 2,
-          fill: 'none',
-          roughness: 1,
-        });
+        path.setAttribute('d', pathData);
+        path.setAttribute('stroke', '#EA1D63');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('fill', 'none');
         path.setAttribute('transform', `scale(${scaleX},${scaleY})`);
         svg.appendChild(path);
       }
