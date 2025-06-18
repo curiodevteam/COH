@@ -1,18 +1,26 @@
-export const func_spanCircles = () => {
-  console.log('test');
+import rough from 'roughjs';
 
+export const func_spanCircles = () => {
   // Create and append styles
   const style = document.createElement('style');
   style.textContent = `
     .highlight {
       position: relative;
       display: inline-block;
-      padding: 1px; /* half of stroke-width */
+    }
+    .highlight > svg {
+      position: absolute;
+      top: -2px;
+      left: -0.5em;
+      width: calc(100% + 1em);
+      height: calc(100% + 4px);
+      z-index: -1;
+      pointer-events: none;
+      overflow: visible;
     }
     .text {
       position: relative;
       z-index: 1;
-      padding: 0 10px; /* adjust as needed */
     }
   `;
   document.head.appendChild(style);
@@ -45,8 +53,8 @@ export const func_spanCircles = () => {
     let match;
     while ((match = regex.exec(text))) {
       result += text.slice(lastIndex, match.index);
-      const innerText = match[1].trim().replace(/\s+/g, ' ');
-      result += `<span class="highlight"><svg style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;"><rect style="fill:none;stroke:red;stroke-width:2;" /></svg><span class="text">${innerText}</span></span>`;
+      const innerText = match[1].trim().replace(/\s+/g, ' ');
+      result += `<span class="highlight"><svg style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;"></svg><span class="text">${innerText}</span></span>`;
       lastIndex = match.index + match[0].length;
     }
     result += text.slice(lastIndex);
@@ -60,29 +68,44 @@ export const func_spanCircles = () => {
     parent.removeChild(node);
   });
 
-  // Функция для обновления размеров SVG rect
-  function updateRects() {
+  // Function to update ellipses using Rough.js
+  function updateEllipses() {
     document.querySelectorAll('.highlight').forEach((highlight) => {
       const svg = highlight.querySelector('svg');
-      const rect = svg && svg.querySelector('rect');
-      if (svg && rect) {
+      if (svg) {
         const { width, height } = highlight.getBoundingClientRect();
-        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        const em = parseFloat(getComputedStyle(highlight).fontSize) || 16;
+        const padding = em; // по 0.5em слева и справа
+        const svgWidth = width + padding;
+        const svgHeight = height + 8; // небольшой запас по высоте
+        svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
+        svg.setAttribute('width', svgWidth.toString());
+        svg.setAttribute('height', svgHeight.toString());
         svg.setAttribute('preserveAspectRatio', 'none');
-        rect.setAttribute('width', width.toString());
-        rect.setAttribute('height', height.toString());
-        const r = (height / 2).toString();
-        rect.setAttribute('rx', r);
-        rect.setAttribute('ry', r);
+        svg.innerHTML = '';
+        const roughSvg = rough.svg(svg);
+        const baseW = 509,
+          baseH = 63;
+        const scaleX = svgWidth / baseW;
+        const scaleY = svgHeight / baseH;
+        const pathData = `M276.944 60.9893C269.559 60.9979 262.074 61 254.5 61C112.873 61 2 60.2684 2 30.0629C2 -0.142578 112.873 2.03456 254.5 2.03456C396.127 2.03456 507 -0.142578 507 30.0629C507 55.9993 425.253 60.2044 312.481 60.875C307.552 60.9043 302.563 60.9269 297.519 60.9442M276.944 60.9893C283.895 60.9813 290.756 60.9674 297.519 60.9442M276.944 60.9893L297.519 60.9442`;
+        const path = roughSvg.path(pathData, {
+          stroke: '#EA1D63',
+          strokeWidth: 2,
+          fill: 'none',
+          roughness: 1,
+        });
+        path.setAttribute('transform', `scale(${scaleX},${scaleY})`);
+        svg.appendChild(path);
       }
     });
   }
 
-  // Первоначальный вызов
-  requestAnimationFrame(updateRects);
+  // Initial call
+  requestAnimationFrame(updateEllipses);
 
-  // Обработка resize
+  // Handle resize
   window.addEventListener('resize', () => {
-    requestAnimationFrame(updateRects);
+    requestAnimationFrame(updateEllipses);
   });
 };
