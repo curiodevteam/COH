@@ -1,4 +1,6 @@
 export const func_spanCircles = () => {
+  console.log('test');
+
   // Create and append styles
   const style = document.createElement('style');
   style.textContent = `
