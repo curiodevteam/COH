@@ -5,9 +5,11 @@ import { func_leadershipPageHeight } from '$utils/leadership-page-height';
 import { func_popupOverlayHandler } from '$utils/popup-overlay-handler';
 import { func_spanCircles } from '$utils/span-circles';
 import { func_yearChanger } from '$utils/year-changer';
+import { loadFinsweetAttributes } from '$utils/finsweet-attributes-loader';
 
 window.Webflow ||= [];
 window.Webflow.push(() => {
+  loadFinsweetAttributes();
   heroLightboxVideo();
   coloredGridPattern();
   func_popupOverlayHandler();
