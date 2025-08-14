@@ -10,7 +10,9 @@ export const loadFinsweetAttributes = () => {
   script.async = true;
   script.type = 'module';
   script.src = 'https://cdn.jsdelivr.net/npm/@finsweet/attributes@2/attributes.js';
+  //add your attributes here
   script.setAttribute('fs-attributes-auto', '');
+  script.setAttribute('fs-list', '');
 
   // Add script to document head
   document.head.appendChild(script);
