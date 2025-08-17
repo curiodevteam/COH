@@ -13,6 +13,7 @@ export const loadFinsweetAttributes = () => {
   //add your attributes here
   script.setAttribute('fs-attributes-auto', '');
   script.setAttribute('fs-list', '');
+  script.setAttribute('fs-toc', '');
 
   // Add script to document head
   document.head.appendChild(script);
