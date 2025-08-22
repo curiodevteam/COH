@@ -11,6 +11,7 @@ import { func_spanCircles } from '$utils/span-circles';
 import { func_yearChanger } from '$utils/year-changer';
 import { func_compareTableHeight } from '$utils/compare-table-height';
 import { glossaryHandler } from '$utils/glossary-handler';
+import { faqCategoryOrganizer } from '$utils/faq-category-organizer';
 
 window.Webflow ||= [];
 window.Webflow.push(() => {
@@ -27,4 +28,5 @@ window.Webflow.push(() => {
   func_compareTableHeight();
   loadSharerScript();
   glossaryHandler();
+  faqCategoryOrganizer();
 });
