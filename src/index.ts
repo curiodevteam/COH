@@ -12,6 +12,7 @@ import { func_yearChanger } from '$utils/year-changer';
 import { func_compareTableHeight } from '$utils/compare-table-height';
 import { glossaryHandler } from '$utils/glossary-handler';
 import { faqCategoryOrganizer } from '$utils/faq-category-organizer';
+import { hubspotFormPlaceholders } from '$utils/hubspot-form-placeholders';
 
 window.Webflow ||= [];
 window.Webflow.push(() => {
@@ -29,4 +30,5 @@ window.Webflow.push(() => {
   loadSharerScript();
   glossaryHandler();
   faqCategoryOrganizer();
+  hubspotFormPlaceholders();
 });
