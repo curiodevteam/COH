@@ -279,7 +279,7 @@ export const glossaryHandler = () => {
 
     // Re-run every 200ms for 3s total
     const intervalMs = 200;
-    const totalMs = 3000;
+    const totalMs = 10000;
     const start = Date.now();
     const intervalId = setInterval(() => {
       if (Date.now() - start >= totalMs) {
