@@ -41,6 +41,10 @@ export const glossaryHandler = () => {
   // Function to wait for Finsweet list to load using FinsweetAttributes API
   const waitForFinsweetLoad = (): Promise<void> => {
     return new Promise((resolve) => {
+      let attempts = 0;
+      const maxAttempts = 30; // 30 attempts * 100ms = 3 seconds total
+      let timeoutId: number;
+
       // Check if FinsweetAttributes is available
       if (typeof window.FinsweetAttributes === 'undefined') {
         // Fallback: wait for FinsweetAttributes to be available
@@ -48,7 +52,16 @@ export const glossaryHandler = () => {
           if (typeof window.FinsweetAttributes !== 'undefined') {
             waitForListLoad();
           } else {
-            setTimeout(checkFinsweetAvailable, 100);
+            attempts++;
+            if (attempts < maxAttempts) {
+              timeoutId = setTimeout(checkFinsweetAvailable, 100);
+            } else {
+              // After 3 seconds, fallback to manual check
+              console.warn(
+                'FinsweetAttributes not available after 3 seconds, using fallback method'
+              );
+              fallbackCheck();
+            }
           }
         };
         checkFinsweetAvailable();
@@ -79,55 +92,60 @@ export const glossaryHandler = () => {
                 })
                 .catch(() => {
                   // Fallback if list loading fails
-                  setTimeout(() => resolve(), 1000);
+                  console.warn('FinsweetAttributes list loading failed, using fallback method');
+                  fallbackCheck();
                 });
             } else {
               // Fallback: check for elements manually
-              const checkElements = () => {
-                if (glossaryTermsList) {
-                  const items = glossaryTermsList.querySelectorAll('[glossary_terms-list-item]');
-                  if (items.length > 0) {
-                    // Additional delay to ensure all items are fully rendered
-                    setTimeout(() => resolve(), 500);
-                  } else {
-                    setTimeout(checkElements, 100);
-                  }
-                }
-              };
-              checkElements();
+              fallbackCheck();
             }
           } else {
             // Fallback: check for elements manually
-            const checkElements = () => {
-              if (glossaryTermsList) {
-                const items = glossaryTermsList.querySelectorAll('[glossary_terms-list-item]');
-                if (items.length > 0) {
-                  // Additional delay to ensure all items are fully rendered
-                  setTimeout(() => resolve(), 500);
-                } else {
-                  setTimeout(checkElements, 100);
-                }
-              }
-            };
-            checkElements();
+            fallbackCheck();
           }
         } catch (error) {
           console.warn('FinsweetAttributes API error, using fallback method:', error);
           // Fallback method
-          const checkElements = () => {
-            if (glossaryTermsList) {
-              const items = glossaryTermsList.querySelectorAll('[glossary_terms-list-item]');
-              if (items.length > 0) {
-                // Additional delay to ensure all items are fully rendered
-                setTimeout(() => resolve(), 500);
-              } else {
-                setTimeout(checkElements, 100);
-              }
-            }
-          };
-          checkElements();
+          fallbackCheck();
         }
       }
+
+      function fallbackCheck() {
+        attempts++;
+        if (glossaryTermsList) {
+          const items = glossaryTermsList.querySelectorAll('[glossary_terms-list-item]');
+          if (items.length > 0) {
+            // Additional delay to ensure all items are fully rendered
+            setTimeout(() => resolve(), 500);
+          } else if (attempts < maxAttempts) {
+            timeoutId = setTimeout(fallbackCheck, 100);
+          } else {
+            // After 3 seconds, resolve anyway to prevent infinite waiting
+            console.warn('Glossary items not found after 3 seconds, proceeding anyway');
+            resolve();
+          }
+        } else if (attempts < maxAttempts) {
+          timeoutId = setTimeout(fallbackCheck, 100);
+        } else {
+          // After 3 seconds, resolve anyway to prevent infinite waiting
+          console.warn('Glossary terms list not found after 3 seconds, proceeding anyway');
+          resolve();
+        }
+      }
+
+      // Cleanup function to clear timeout if needed
+      const cleanup = () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+
+      // Set a hard timeout as final fallback
+      setTimeout(() => {
+        cleanup();
+        console.warn('Hard timeout reached, proceeding with glossary initialization');
+        resolve();
+      }, 3500); // 3.5 seconds total
     });
   };
 
