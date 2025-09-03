@@ -38,6 +38,100 @@ export const glossaryHandler = () => {
     });
   };
 
+  // Build alphabet navigation
+  function createAlphabetNavigation(
+    wrapper: Element,
+    terms: { title: string; element: Element; firstLetter: string }[]
+  ) {
+    wrapper.innerHTML = '';
+
+    const uniqueLetters = [...new Set(terms.map((term) => term.firstLetter))].sort();
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+    alphabet.forEach((letter) => {
+      const letterParent = document.createElement('div');
+      letterParent.setAttribute('glossary_letter-parent', '');
+      letterParent.className = 'text-size-regular text-weight-medium';
+
+      const letterLink = document.createElement('a');
+      letterLink.setAttribute('glossary_letter-link', '');
+      letterLink.href = '#';
+      letterLink.className = 'glossary_letter';
+      letterLink.textContent = letter;
+
+      if (!uniqueLetters.includes(letter)) {
+        letterLink.classList.add('is-disabled');
+      } else {
+        letterLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          const firstTermWithLetter = terms.find((term) => term.firstLetter === letter);
+          if (firstTermWithLetter) {
+            scrollToElementWithOffset(firstTermWithLetter.element);
+          }
+        });
+      }
+
+      letterParent.appendChild(letterLink);
+      wrapper.appendChild(letterParent);
+    });
+  }
+
+  // Build terms navigation
+  function createTermsNavigation(
+    navigation: Element,
+    terms: { title: string; element: Element; firstLetter: string }[]
+  ) {
+    navigation.innerHTML = '';
+
+    const termsByLetter = terms.reduce(
+      (acc, term) => {
+        if (!acc[term.firstLetter]) acc[term.firstLetter] = [];
+        acc[term.firstLetter].push(term);
+        return acc;
+      },
+      {} as Record<string, { title: string; element: Element; firstLetter: string }[]>
+    );
+
+    Object.keys(termsByLetter)
+      .sort()
+      .forEach((letter) => {
+        const navigationItem = document.createElement('div');
+        navigationItem.setAttribute('glossary_terms-navigation-item', '');
+        navigationItem.className = 'glossary_terms-navigation-item';
+
+        const letterHeading = document.createElement('p');
+        letterHeading.setAttribute('glossary_terms-navigation-letter', '');
+        letterHeading.className = 'heading-style-h3';
+        letterHeading.textContent = letter;
+
+        const termsList = document.createElement('div');
+        termsList.setAttribute('glossary_terms-navigation-list', '');
+        termsList.className = 'glossary_terms-navigation-list';
+
+        const sortedTerms = termsByLetter[letter].sort((a, b) => a.title.localeCompare(b.title));
+
+        sortedTerms.forEach((term) => {
+          const termLink = document.createElement('a');
+          termLink.setAttribute('glossary-nav-link', '');
+          termLink.href = '#';
+          termLink.className =
+            'text-size-medium text-weight-medium text-color-secondary is-glossary-nav-link';
+          termLink.textContent = term.title;
+
+          termLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            scrollToElementWithOffset(term.element);
+          });
+
+          termsList.appendChild(termLink);
+        });
+
+        navigationItem.appendChild(letterHeading);
+        navigationItem.appendChild(termsList);
+        navigation.appendChild(navigationItem);
+      });
+  }
+
   // Function to wait for Finsweet list to load using FinsweetAttributes API
   const waitForFinsweetLoad = (): Promise<void> => {
     return new Promise((resolve) => {
@@ -52,12 +146,12 @@ export const glossaryHandler = () => {
           if (typeof window.FinsweetAttributes !== 'undefined') {
             waitForListLoad();
           } else {
-            attempts++;
+            attempts += 1;
             if (attempts < maxAttempts) {
               timeoutId = setTimeout(checkFinsweetAvailable, 100);
             } else {
               // After 3 seconds, fallback to manual check
-              console.warn(
+              console.error(
                 'FinsweetAttributes not available after 3 seconds, using fallback method'
               );
               fallbackCheck();
@@ -92,7 +186,7 @@ export const glossaryHandler = () => {
                 })
                 .catch(() => {
                   // Fallback if list loading fails
-                  console.warn('FinsweetAttributes list loading failed, using fallback method');
+                  console.error('FinsweetAttributes list loading failed, using fallback method');
                   fallbackCheck();
                 });
             } else {
@@ -104,14 +198,14 @@ export const glossaryHandler = () => {
             fallbackCheck();
           }
         } catch (error) {
-          console.warn('FinsweetAttributes API error, using fallback method:', error);
+          console.error('FinsweetAttributes API error, using fallback method:', error);
           // Fallback method
           fallbackCheck();
         }
       }
 
       function fallbackCheck() {
-        attempts++;
+        attempts += 1;
         if (glossaryTermsList) {
           const items = glossaryTermsList.querySelectorAll('[glossary_terms-list-item]');
           if (items.length > 0) {
@@ -121,14 +215,14 @@ export const glossaryHandler = () => {
             timeoutId = setTimeout(fallbackCheck, 100);
           } else {
             // After 3 seconds, resolve anyway to prevent infinite waiting
-            console.warn('Glossary items not found after 3 seconds, proceeding anyway');
+            console.error('Glossary items not found after 3 seconds, proceeding anyway');
             resolve();
           }
         } else if (attempts < maxAttempts) {
           timeoutId = setTimeout(fallbackCheck, 100);
         } else {
           // After 3 seconds, resolve anyway to prevent infinite waiting
-          console.warn('Glossary terms list not found after 3 seconds, proceeding anyway');
+          console.error('Glossary terms list not found after 3 seconds, proceeding anyway');
           resolve();
         }
       }
@@ -143,151 +237,59 @@ export const glossaryHandler = () => {
       // Set a hard timeout as final fallback
       setTimeout(() => {
         cleanup();
-        console.warn('Hard timeout reached, proceeding with glossary initialization');
+        console.error('Hard timeout reached, proceeding with glossary initialization');
         resolve();
       }, 3500); // 3.5 seconds total
     });
   };
 
-  // Main initialization function
-  const initGlossary = async () => {
-    await waitForFinsweetLoad();
+  // Initialize glossary with repeated checks
+  const initializeWithRetries = () => {
+    let isBuilding = false;
 
-    const termsList = glossaryTermsList.querySelectorAll('[glossary_terms-list-item]');
-    const lettersWrapper = document.querySelector('[glossary_letters-wrapper]');
-    const termsNavigation = document.querySelector('[glossary_terms-navigation]');
+    const buildOnce = async () => {
+      if (isBuilding) return;
+      isBuilding = true;
+      try {
+        await waitForFinsweetLoad();
+        const termsList = glossaryTermsList.querySelectorAll('[glossary_terms-list-item]');
+        const lettersWrapper = document.querySelector('[glossary_letters-wrapper]');
+        const termsNavigation = document.querySelector('[glossary_terms-navigation]');
+        if (!lettersWrapper || !termsNavigation) return;
 
-    if (!lettersWrapper || !termsNavigation) {
-      return;
-    }
-
-    // Extract terms and their first letters
-    const terms: { title: string; element: Element; firstLetter: string }[] = [];
-
-    termsList.forEach((item) => {
-      const titleElement = item.querySelector('[glossary_terms-list-item-title]');
-      if (titleElement) {
-        const title = titleElement.textContent?.trim() || '';
-        const firstLetter = title.charAt(0).toUpperCase();
-        terms.push({ title, element: item, firstLetter });
-      }
-    });
-
-    // Create alphabet navigation
-    createAlphabetNavigation(lettersWrapper, terms);
-
-    // Create terms navigation
-    createTermsNavigation(termsNavigation, terms);
-  };
-
-  // Create alphabet navigation
-  const createAlphabetNavigation = (
-    wrapper: Element,
-    terms: { title: string; element: Element; firstLetter: string }[]
-  ) => {
-    // Clear all existing content
-    wrapper.innerHTML = '';
-
-    // Get unique letters from terms
-    const uniqueLetters = [...new Set(terms.map((term) => term.firstLetter))].sort();
-
-    // Create alphabet (A-Z)
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-    alphabet.forEach((letter) => {
-      const letterParent = document.createElement('div');
-      letterParent.setAttribute('glossary_letter-parent', '');
-      letterParent.className = 'text-size-regular text-weight-medium';
-
-      const letterLink = document.createElement('a');
-      letterLink.setAttribute('glossary_letter-link', '');
-      letterLink.href = '#';
-      letterLink.className = 'glossary_letter';
-      letterLink.textContent = letter;
-
-      // Add disabled class if no terms start with this letter
-      if (!uniqueLetters.includes(letter)) {
-        letterLink.classList.add('is-disabled');
-      } else {
-        // Add click handler to scroll to first term with this letter
-        letterLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          const firstTermWithLetter = terms.find((term) => term.firstLetter === letter);
-          if (firstTermWithLetter) {
-            scrollToElementWithOffset(firstTermWithLetter.element);
+        const terms: { title: string; element: Element; firstLetter: string }[] = [];
+        termsList.forEach((item) => {
+          const titleElement = item.querySelector('[glossary_terms-list-item-title]');
+          if (titleElement) {
+            const title = titleElement.textContent?.trim() || '';
+            const firstLetter = title.charAt(0).toUpperCase();
+            terms.push({ title, element: item, firstLetter });
           }
         });
+
+        createAlphabetNavigation(lettersWrapper, terms);
+        createTermsNavigation(termsNavigation, terms);
+      } finally {
+        isBuilding = false;
       }
+    };
 
-      letterParent.appendChild(letterLink);
-      wrapper.appendChild(letterParent);
-    });
+    // First immediate build
+    buildOnce();
+
+    // Re-run every 200ms for 3s total
+    const intervalMs = 200;
+    const totalMs = 3000;
+    const start = Date.now();
+    const intervalId = setInterval(() => {
+      if (Date.now() - start >= totalMs) {
+        clearInterval(intervalId);
+        return;
+      }
+      buildOnce();
+    }, intervalMs);
   };
 
-  // Create terms navigation
-  const createTermsNavigation = (
-    navigation: Element,
-    terms: { title: string; element: Element; firstLetter: string }[]
-  ) => {
-    // Clear existing content
-    navigation.innerHTML = '';
-
-    // Group terms by first letter
-    const termsByLetter = terms.reduce(
-      (acc, term) => {
-        if (!acc[term.firstLetter]) {
-          acc[term.firstLetter] = [];
-        }
-        acc[term.firstLetter].push(term);
-        return acc;
-      },
-      {} as Record<string, { title: string; element: Element; firstLetter: string }[]>
-    );
-
-    // Create navigation items for each letter
-    Object.keys(termsByLetter)
-      .sort()
-      .forEach((letter) => {
-        const navigationItem = document.createElement('div');
-        navigationItem.setAttribute('glossary_terms-navigation-item', '');
-        navigationItem.className = 'glossary_terms-navigation-item';
-
-        const letterHeading = document.createElement('p');
-        letterHeading.setAttribute('glossary_terms-navigation-letter', '');
-        letterHeading.className = 'heading-style-h3';
-        letterHeading.textContent = letter;
-
-        const termsList = document.createElement('div');
-        termsList.setAttribute('glossary_terms-navigation-list', '');
-        termsList.className = 'glossary_terms-navigation-list';
-
-        // Sort terms alphabetically within each letter group
-        const sortedTerms = termsByLetter[letter].sort((a, b) => a.title.localeCompare(b.title));
-
-        // Create links for each term
-        sortedTerms.forEach((term) => {
-          const termLink = document.createElement('a');
-          termLink.setAttribute('glossary-nav-link', '');
-          termLink.href = '#';
-          termLink.className =
-            'text-size-medium text-weight-medium text-color-secondary is-glossary-nav-link';
-          termLink.textContent = term.title;
-
-          // Add click handler to scroll to term
-          termLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            scrollToElementWithOffset(term.element);
-          });
-
-          termsList.appendChild(termLink);
-        });
-
-        navigationItem.appendChild(letterHeading);
-        navigationItem.appendChild(termsList);
-        navigation.appendChild(navigationItem);
-      });
-  };
-
-  // Initialize glossary
-  initGlossary();
+  // Kick off
+  initializeWithRetries();
 };
