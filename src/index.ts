@@ -13,6 +13,7 @@ import { func_compareTableHeight } from '$utils/compare-table-height';
 import { glossaryHandler } from '$utils/glossary-handler';
 import { faqCategoryOrganizer } from '$utils/faq-category-organizer';
 import { hubspotFormPlaceholders } from '$utils/hubspot-form-placeholders';
+import { hubspotFormPlaceholders_v2 } from '$utils/hubspot-form-placeholders_v2';
 
 window.Webflow ||= [];
 window.Webflow.push(() => {
@@ -31,4 +32,5 @@ window.Webflow.push(() => {
   glossaryHandler();
   faqCategoryOrganizer();
   hubspotFormPlaceholders();
+  hubspotFormPlaceholders_v2();
 });
