@@ -14,6 +14,7 @@ import { glossaryHandler } from '$utils/glossary-handler';
 import { faqCategoryOrganizer } from '$utils/faq-category-organizer';
 import { hubspotFormPlaceholders } from '$utils/hubspot-form-placeholders';
 import { hubspotFormPlaceholders_v2 } from '$utils/hubspot-form-placeholders_v2';
+import { navbarMenuAttention } from '$utils/navbar-menu-attention';
 
 window.Webflow ||= [];
 window.Webflow.push(() => {
@@ -33,4 +34,5 @@ window.Webflow.push(() => {
   faqCategoryOrganizer();
   hubspotFormPlaceholders();
   hubspotFormPlaceholders_v2();
+  navbarMenuAttention();
 });
