@@ -1,25 +1,25 @@
 import { func_numberAnimations } from '$utils/animated-numbers';
-import { autoClickOnFirst } from '$utils/auto-click-on-first';
+//import { autoClickOnFirst } from '$utils/auto-click-on-first';
 import { categoryTitleUpdater } from '$utils/category-title-updater';
 import { coloredGridPattern } from '$utils/colored-grid-pattern';
+import { func_compareTableHeight } from '$utils/compare-table-height';
+import { faqCategoryOrganizer } from '$utils/faq-category-organizer';
 import { loadFinsweetAttributes } from '$utils/finsweet-attributes-loader';
+import { glossaryHandler } from '$utils/glossary-handler';
 import { heroLightboxVideo } from '$utils/hero-lightbox-video';
+import { hubspotFormPlaceholders } from '$utils/hubspot-form-placeholders';
+import { hubspotFormPlaceholders_v2 } from '$utils/hubspot-form-placeholders_v2';
 import { func_leadershipPageHeight } from '$utils/leadership-page-height';
+import { navbarMenuAttention } from '$utils/navbar-menu-attention';
 import { func_popupOverlayHandler } from '$utils/popup-overlay-handler';
 import { loadSharerScript } from '$utils/sharer-loader';
 import { func_spanCircles } from '$utils/span-circles';
 import { func_yearChanger } from '$utils/year-changer';
-import { func_compareTableHeight } from '$utils/compare-table-height';
-import { glossaryHandler } from '$utils/glossary-handler';
-import { faqCategoryOrganizer } from '$utils/faq-category-organizer';
-import { hubspotFormPlaceholders } from '$utils/hubspot-form-placeholders';
-import { hubspotFormPlaceholders_v2 } from '$utils/hubspot-form-placeholders_v2';
-import { navbarMenuAttention } from '$utils/navbar-menu-attention';
 
 window.Webflow ||= [];
 window.Webflow.push(() => {
   loadFinsweetAttributes();
-  autoClickOnFirst();
+  //autoClickOnFirst();
   categoryTitleUpdater();
   heroLightboxVideo();
   coloredGridPattern();
