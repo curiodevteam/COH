@@ -14,6 +14,7 @@ export const loadFinsweetAttributes = () => {
   script.setAttribute('fs-attributes-auto', '');
   script.setAttribute('fs-list', '');
   script.setAttribute('fs-toc', '');
+  script.setAttribute('fs-list-showquery', '');
 
   // Add script to document head
   document.head.appendChild(script);
