@@ -15,6 +15,7 @@ import { func_popupOverlayHandler } from '$utils/popup-overlay-handler';
 import { loadSharerScript } from '$utils/sharer-loader';
 import { func_spanCircles } from '$utils/span-circles';
 import { func_yearChanger } from '$utils/year-changer';
+import { moveAppendReadyElement } from '$utils/append-ready';
 
 window.Webflow ||= [];
 window.Webflow.push(() => {
@@ -35,4 +36,5 @@ window.Webflow.push(() => {
   hubspotFormPlaceholders();
   hubspotFormPlaceholders_v2();
   navbarMenuAttention();
+  moveAppendReadyElement();
 });
