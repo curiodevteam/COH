@@ -16,6 +16,7 @@ import { loadSharerScript } from '$utils/sharer-loader';
 import { func_spanCircles } from '$utils/span-circles';
 import { func_yearChanger } from '$utils/year-changer';
 import { moveAppendReadyElement } from '$utils/append-ready';
+import { hubspotUtmInjector } from '$utils/hubspot-utm-injector';
 
 window.Webflow ||= [];
 window.Webflow.push(() => {
@@ -35,6 +36,7 @@ window.Webflow.push(() => {
   faqCategoryOrganizer();
   hubspotFormPlaceholders();
   hubspotFormPlaceholders_v2();
+  hubspotUtmInjector();
   navbarMenuAttention();
   moveAppendReadyElement();
 });
